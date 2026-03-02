@@ -2,7 +2,9 @@ defmodule WingspanScorerWeb.ErrorJSONTest do
   use WingspanScorerWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert WingspanScorerWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert WingspanScorerWeb.ErrorJSON.render("404.json", %{}) == %{
+             errors: %{detail: "Not Found"}
+           }
   end
 
   test "renders 500" do

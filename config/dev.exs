@@ -1,4 +1,5 @@
 import Config
+config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
 config :wingspan_scorer, WingspanScorer.Repo,
@@ -68,7 +69,9 @@ config :wingspan_scorer, WingspanScorerWeb.Endpoint,
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :wingspan_scorer, dev_routes: true
+config :wingspan_scorer,
+  dev_routes: true,
+  token_signing_secret: "QUtInyjE9Zh5cpXFE/Nwj7oijG62AqFZ"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

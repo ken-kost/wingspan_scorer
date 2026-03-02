@@ -11,7 +11,9 @@ defmodule WingspanScorer.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      consolidate_protocols: Mix.env() != :dev,
+      usage_rules: usage_rules()
     ]
   end
 
@@ -40,6 +42,16 @@ defmodule WingspanScorer.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:picosat_elixir, "~> 0.2"},
+      {:sourceror, "~> 1.8", only: [:dev, :test]},
+      {:usage_rules, "~> 1.0", only: [:dev]},
+      {:tidewave, "~> 0.5", only: [:dev]},
+      {:ash_admin, "~> 0.14"},
+      {:ash_authentication_phoenix, "~> 2.0"},
+      {:ash_authentication, "~> 4.0"},
+      {:ash_postgres, "~> 2.0"},
+      {:ash_phoenix, "~> 2.0"},
+      {:ash, "~> 3.0"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:phoenix, "~> 1.8.4"},
       {:phoenix_ecto, "~> 4.5"},
@@ -78,10 +90,10 @@ defmodule WingspanScorer.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      setup: ["deps.get", "ash.setup", "assets.setup", "assets.build", "run priv/repo/seeds.exs"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      test: ["ash.setup --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["compile", "tailwind wingspan_scorer", "esbuild wingspan_scorer"],
       "assets.deploy": [
@@ -92,4 +104,30 @@ defmodule WingspanScorer.MixProject do
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
     ]
   end
+
+        defp usage_rules do
+        # Example for those using claude.
+        [
+          file: "CLAUDE.md",
+          # rules to include directly in CLAUDE.md
+          usage_rules: ["usage_rules:all"],
+          skills: [
+            location: ".claude/skills",
+            # build skills that combine multiple usage rules
+            build: [
+              "ash-framework": [
+                # The description tells people how to use this skill.
+                description: "Use this skill working with Ash Framework or any of its extensions. Always consult this when making any domain changes, features or fixes.",
+                # Include all Ash dependencies
+                usage_rules: [:ash, ~r/^ash_/]
+              ],
+              "phoenix-framework": [
+                description: "Use this skill working with Phoenix Framework. Consult this when working with the web layer, controllers, views, liveviews etc.",
+                # Include all Phoenix dependencies
+                usage_rules: [:phoenix, ~r/^phoenix_/]
+              ]
+            ]
+          ]
+        ]
+      end
 end

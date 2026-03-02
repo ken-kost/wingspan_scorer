@@ -15,7 +15,8 @@ defmodule WingspanScorer.Application do
       # Start a worker by calling: WingspanScorer.Worker.start_link(arg)
       # {WingspanScorer.Worker, arg},
       # Start to serve requests, typically the last entry
-      WingspanScorerWeb.Endpoint
+      WingspanScorerWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :wingspan_scorer]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

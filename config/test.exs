@@ -1,4 +1,7 @@
 import Config
+config :wingspan_scorer, token_signing_secret: "FIXJGPvZtlA9xvTz14sn5zToBzkyK46I"
+config :bcrypt_elixir, log_rounds: 1
+config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 
 # Configure your database
 #
