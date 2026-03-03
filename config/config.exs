@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :cinder, default_theme: "daisy_ui"
+
 config :ash,
   allow_forbidden_field_for_relationships_by_default?: true,
   include_embedded_source_by_default?: false,
@@ -18,7 +20,7 @@ config :ash,
   read_action_after_action_hooks_in_order?: true,
   bulk_actions_default_to_errors?: true,
   transaction_rollback_on_error?: true,
-  known_types: [AshPostgres.Timestamptz, AshPostgres.TimestamptzUsec]
+  known_types: []
 
 config :spark,
   formatter: [
@@ -29,7 +31,7 @@ config :spark,
         :authentication,
         :token,
         :user_identity,
-        :postgres,
+        :ets,
         :resource,
         :code_interface,
         :actions,
@@ -52,9 +54,7 @@ config :spark,
   ]
 
 config :wingspan_scorer,
-  ecto_repos: [WingspanScorer.Repo],
-  generators: [timestamp_type: :utc_datetime],
-  ash_domains: [WingspanScorer.Accounts],
+  ash_domains: [WingspanScorer.Accounts, WingspanScorer.Games],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
 # Configure the endpoint

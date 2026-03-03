@@ -1,16 +1,6 @@
 import Config
 config :ash, policies: [show_policy_breakdowns?: true]
 
-# Configure your database
-config :wingspan_scorer, WingspanScorer.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "wingspan_scorer_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

@@ -1,5 +1,6 @@
 [
   import_deps: [
+    :cinder,
     :ash_admin,
     :ash_authentication_phoenix,
     :ash_authentication,

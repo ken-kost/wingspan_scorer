@@ -2,9 +2,15 @@ defmodule WingspanScorer.Accounts.User do
   use Ash.Resource,
     otp_app: :wingspan_scorer,
     domain: WingspanScorer.Accounts,
-    data_layer: AshPostgres.DataLayer,
+    data_layer: Ash.DataLayer.Mnesia,
     authorizers: [Ash.Policy.Authorizer],
     extensions: [AshAuthentication]
+
+  require Ash.Query
+
+  mnesia do
+    table :users
+  end
 
   authentication do
     add_ons do
@@ -22,21 +28,14 @@ defmodule WingspanScorer.Accounts.User do
     end
 
     strategies do
-      magic_link do
+      password :password do
         identity_field :email
-        registration_enabled? true
-        require_interaction? true
-
-        sender WingspanScorer.Accounts.User.Senders.SendMagicLinkEmail
+        hashed_password_field :hashed_password
+        confirmation_required? false
       end
 
       remember_me :remember_me
     end
-  end
-
-  postgres do
-    table "users"
-    repo WingspanScorer.Repo
   end
 
   actions do
@@ -54,46 +53,37 @@ defmodule WingspanScorer.Accounts.User do
       get_by :email
     end
 
-    create :sign_in_with_magic_link do
-      description "Sign in or register a user with magic link."
+    read :search do
+      argument :query, :string, allow_nil?: false
 
-      argument :token, :string do
-        description "The token from the magic link that was sent to the user"
-        allow_nil? false
-      end
-
-      argument :remember_me, :boolean do
-        description "Whether to generate a remember me token"
-        allow_nil? true
-      end
-
-      upsert? true
-      upsert_identity :unique_email
-      upsert_fields [:email]
-
-      # Uses the information from the token to create or sign in the user
-      change AshAuthentication.Strategy.MagicLink.SignInChange
-
-      change {AshAuthentication.Strategy.RememberMe.MaybeGenerateTokenChange,
-              strategy_name: :remember_me}
-
-      metadata :token, :string do
-        allow_nil? false
+      prepare fn query, _context ->
+        search = Ash.Query.get_argument(query, :query)
+        pattern = "%#{search}%"
+        Ash.Query.filter(query, contains(email, ^search) or contains(name, ^search))
       end
     end
 
-    action :request_magic_link do
-      argument :email, :ci_string do
-        allow_nil? false
-      end
-
-      run AshAuthentication.Strategy.MagicLink.Request
+    update :update_profile do
+      accept [:name]
+      require_atomic? false
     end
   end
 
   policies do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
       authorize_if always()
+    end
+
+    policy action(:search) do
+      authorize_if actor_present()
+    end
+
+    policy action(:update_profile) do
+      authorize_if expr(id == ^actor(:id))
+    end
+
+    policy action_type(:read) do
+      authorize_if actor_present()
     end
   end
 
@@ -104,9 +94,53 @@ defmodule WingspanScorer.Accounts.User do
       allow_nil? false
       public? true
     end
+
+    attribute :name, :string do
+      allow_nil? true
+      public? true
+    end
+
+    attribute :hashed_password, :string do
+      allow_nil? false
+      sensitive? true
+    end
+  end
+
+  relationships do
+    has_many :friendships, WingspanScorer.Accounts.Friendship
+
+    many_to_many :friends, WingspanScorer.Accounts.User do
+      through WingspanScorer.Accounts.Friendship
+      source_attribute_on_join_resource :user_id
+      destination_attribute_on_join_resource :friend_id
+    end
+
+    has_many :game_players, WingspanScorer.Games.GamePlayer
+  end
+
+  aggregates do
+    count :total_games, :game_players do
+      filter expr(game.completed == true)
+    end
+
+    count :games_won, :game_players do
+      filter expr(game.completed == true and is_winner == true)
+    end
+
+    max :highest_score, :game_players, :base_total do
+      filter expr(game.completed == true)
+    end
+
+    min :lowest_score, :game_players, :base_total do
+      filter expr(game.completed == true)
+    end
+
+    avg :average_score, :game_players, :base_total do
+      filter expr(game.completed == true)
+    end
   end
 
   identities do
-    identity :unique_email, [:email]
+    identity :unique_email, [:email], pre_check_with: WingspanScorer.Accounts
   end
 end

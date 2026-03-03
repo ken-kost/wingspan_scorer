@@ -7,9 +7,10 @@ defmodule WingspanScorer.Application do
 
   @impl true
   def start(_type, _args) do
+    init_mnesia()
+
     children = [
       WingspanScorerWeb.Telemetry,
-      WingspanScorer.Repo,
       {DNSCluster, query: Application.get_env(:wingspan_scorer, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: WingspanScorer.PubSub},
       # Start a worker by calling: WingspanScorer.Worker.start_link(arg)
@@ -23,6 +24,16 @@ defmodule WingspanScorer.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: WingspanScorer.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp init_mnesia do
+    case :mnesia.create_schema([node()]) do
+      :ok -> :ok
+      {:error, {_, {:already_exists, _}}} -> :ok
+    end
+
+    Ash.DataLayer.Mnesia.start(WingspanScorer.Accounts)
+    Ash.DataLayer.Mnesia.start(WingspanScorer.Games)
   end
 
   # Tell Phoenix to update the endpoint configuration

@@ -25,59 +25,28 @@ defmodule WingspanScorerWeb.Router do
     pipe_through :browser
 
     ash_authentication_live_session :authenticated_routes do
-      # in each liveview, add one of the following at the top of the module:
-      #
-      # If an authenticated user must be present:
-      # on_mount {WingspanScorerWeb.LiveUserAuth, :live_user_required}
-      #
-      # If an authenticated user *may* be present:
-      # on_mount {WingspanScorerWeb.LiveUserAuth, :live_user_optional}
-      #
-      # If an authenticated user must *not* be present:
-      # on_mount {WingspanScorerWeb.LiveUserAuth, :live_no_user}
+      live "/", DashboardLive
+      live "/games/:game_id", DashboardLive
+      live "/history", HistoryLive
+      live "/friends", FriendsLive
+      live "/friends/:user_id", FriendProfileLive
+      live "/settings", SettingsLive
     end
   end
 
   scope "/", WingspanScorerWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
     auth_routes AuthController, WingspanScorer.Accounts.User, path: "/auth"
     sign_out_route AuthController
 
-    # Remove these if you'd like to use your own authentication views
     sign_in_route register_path: "/register",
-                  reset_path: "/reset",
                   auth_routes_prefix: "/auth",
                   on_mount: [{WingspanScorerWeb.LiveUserAuth, :live_no_user}],
                   overrides: [
                     WingspanScorerWeb.AuthOverrides,
                     Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
                   ]
-
-    # Remove this if you do not want to use the reset password feature
-    reset_route auth_routes_prefix: "/auth",
-                overrides: [
-                  WingspanScorerWeb.AuthOverrides,
-                  Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
-                ]
-
-    # Remove this if you do not use the confirmation strategy
-    confirm_route WingspanScorer.Accounts.User, :confirm_new_user,
-      auth_routes_prefix: "/auth",
-      overrides: [
-        WingspanScorerWeb.AuthOverrides,
-        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
-      ]
-
-    # Remove this if you do not use the magic link strategy.
-    magic_sign_in_route(WingspanScorer.Accounts.User, :magic_link,
-      auth_routes_prefix: "/auth",
-      overrides: [
-        WingspanScorerWeb.AuthOverrides,
-        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
-      ]
-    )
   end
 
   # Other scopes may use custom stacks.
