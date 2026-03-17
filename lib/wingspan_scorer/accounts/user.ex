@@ -2,14 +2,15 @@ defmodule WingspanScorer.Accounts.User do
   use Ash.Resource,
     otp_app: :wingspan_scorer,
     domain: WingspanScorer.Accounts,
-    data_layer: Ash.DataLayer.Mnesia,
+    data_layer: AshSqlite.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
     extensions: [AshAuthentication]
 
   require Ash.Query
 
-  mnesia do
-    table :users
+  sqlite do
+    repo WingspanScorer.Repo
+    table "users"
   end
 
   authentication do
@@ -118,26 +119,12 @@ defmodule WingspanScorer.Accounts.User do
     has_many :game_players, WingspanScorer.Games.GamePlayer
   end
 
-  aggregates do
-    count :total_games, :game_players do
-      filter expr(game.completed == true)
-    end
-
-    count :games_won, :game_players do
-      filter expr(game.completed == true and is_winner == true)
-    end
-
-    max :highest_score, :game_players, :base_total do
-      filter expr(game.completed == true)
-    end
-
-    min :lowest_score, :game_players, :base_total do
-      filter expr(game.completed == true)
-    end
-
-    avg :average_score, :game_players, :base_total do
-      filter expr(game.completed == true)
-    end
+  calculations do
+    calculate :total_games, :integer, {WingspanScorer.Accounts.Calculations.UserStats, stat: :total_games}
+    calculate :games_won, :integer, {WingspanScorer.Accounts.Calculations.UserStats, stat: :games_won}
+    calculate :highest_score, :integer, {WingspanScorer.Accounts.Calculations.UserStats, stat: :highest_score}
+    calculate :lowest_score, :integer, {WingspanScorer.Accounts.Calculations.UserStats, stat: :lowest_score}
+    calculate :average_score, :float, {WingspanScorer.Accounts.Calculations.UserStats, stat: :average_score}
   end
 
   identities do

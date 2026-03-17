@@ -1,6 +1,9 @@
 import Config
 config :ash, policies: [show_policy_breakdowns?: true]
 
+config :wingspan_scorer, WingspanScorer.Repo,
+  database: Path.expand("../wingspan_scorer_dev.db", __DIR__)
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

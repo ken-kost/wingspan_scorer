@@ -2,11 +2,12 @@ defmodule WingspanScorer.Games.Game do
   use Ash.Resource,
     otp_app: :wingspan_scorer,
     domain: WingspanScorer.Games,
-    data_layer: Ash.DataLayer.Mnesia,
+    data_layer: AshSqlite.DataLayer,
     authorizers: [Ash.Policy.Authorizer]
 
-  mnesia do
-    table :games
+  sqlite do
+    repo WingspanScorer.Repo
+    table "games"
   end
 
   actions do
@@ -122,7 +123,7 @@ defmodule WingspanScorer.Games.Game do
     end
   end
 
-  aggregates do
-    count :player_count, :game_players
+  calculations do
+    calculate :player_count, :integer, WingspanScorer.Games.Calculations.PlayerCount
   end
 end

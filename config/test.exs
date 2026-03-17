@@ -3,6 +3,11 @@ config :wingspan_scorer, token_signing_secret: "FIXJGPvZtlA9xvTz14sn5zToBzkyK46I
 config :bcrypt_elixir, log_rounds: 1
 config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 
+config :wingspan_scorer, WingspanScorer.Repo,
+  database: Path.expand("../wingspan_scorer_test.db", __DIR__),
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: 1
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :wingspan_scorer, WingspanScorerWeb.Endpoint,

@@ -20,10 +20,6 @@ if System.get_env("PHX_SERVER") do
   config :wingspan_scorer, WingspanScorerWeb.Endpoint, server: true
 end
 
-if mnesia_dir = System.get_env("MNESIA_DIR") do
-  config :mnesia, dir: String.to_charlist(mnesia_dir)
-end
-
 config :wingspan_scorer, WingspanScorerWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 

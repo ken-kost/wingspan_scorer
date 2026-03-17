@@ -2,11 +2,12 @@ defmodule WingspanScorer.Accounts.Friendship do
   use Ash.Resource,
     otp_app: :wingspan_scorer,
     domain: WingspanScorer.Accounts,
-    data_layer: Ash.DataLayer.Mnesia,
+    data_layer: AshSqlite.DataLayer,
     authorizers: [Ash.Policy.Authorizer]
 
-  mnesia do
-    table :friendships
+  sqlite do
+    repo WingspanScorer.Repo
+    table "friendships"
   end
 
   actions do

@@ -2,12 +2,13 @@ defmodule WingspanScorer.Accounts.Token do
   use Ash.Resource,
     otp_app: :wingspan_scorer,
     domain: WingspanScorer.Accounts,
-    data_layer: Ash.DataLayer.Mnesia,
+    data_layer: AshSqlite.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
     extensions: [AshAuthentication.TokenResource]
 
-  mnesia do
-    table :tokens
+  sqlite do
+    repo WingspanScorer.Repo
+    table "tokens"
   end
 
   actions do
@@ -33,7 +34,7 @@ defmodule WingspanScorer.Accounts.Token do
       argument :token, :string, sensitive?: true
       argument :jti, :string, sensitive?: true
 
-      run WingspanScorer.Accounts.Token.IsRevoked
+      run AshAuthentication.TokenResource.IsRevoked
     end
 
     create :revoke_token do

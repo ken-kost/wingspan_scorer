@@ -54,6 +54,7 @@ config :spark,
   ]
 
 config :wingspan_scorer,
+  ecto_repos: [WingspanScorer.Repo],
   ash_domains: [WingspanScorer.Accounts, WingspanScorer.Games],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
